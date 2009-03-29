@@ -1,11 +1,18 @@
 import datetime
 from django.db import models
 
-class ResurrectableManager(models.Manager):
-    def get_quety_set(self):
-        return super(LibraryManager, self).get_query_set().filter(deleted=None)
+class ResurrectableQuerySet(models.query.QuerySet):
+    def not_deleted(self):
+        return self.filter(deleted=None)
+    def deleted(self):
+        return self.exclude(deleted=None)
 
-class Resurrectable(object):
+class ResurrectableManager(models.Manager):
+    use_for_related_fields = True
+    def get_query_set(self):
+        return ResurrectableQuerySet(self.model)
+
+class Resurrectable(models.Model):
     """
     Public methods:
      * delete(self, date_time=datetime.datetime.now(), cascade=True)
@@ -16,12 +23,15 @@ class Resurrectable(object):
 
     objects = ResurrectableManager()
 
-    def _get_children(self):
+    class Meta:
+        abstract = True
+
+    def _get_resurrectable_children(self):
         return getattr(self.Meta, 'resurrectable_children', [])
 
-    def delete(self, date_time=datetime.datetime.now(), cascade=True):
-        if cascade:
-            for child in self._get_children():
+    def delete(self, cascade=True, date_time=datetime.datetime.now()):
+        if cascade and False:
+            for child in self._get_resurrectable_children():
                 child.delete(date_time)
         self.deleted = date_time
         self.save()
@@ -29,6 +39,6 @@ class Resurrectable(object):
     def undelete(self, cascase=True):
         self.deleted = None
         self.save()
-        if cascade:
-            for child in self._get_children():
+        if cascade and False:
+            for child in self._get_resurrectable_children():
                 child.undelete()

@@ -1,3 +1,83 @@
-This doesn't work yet.
+django-resurrectable
 
-It's just an idea.
+Summary
+-------
+
+This is a basic implementation of "pseudo-deleting" model instances, so they can
+be un-deleted later.
+
+Terminology
+-----------
+
+This document uses the terms "undeleted" and "non-deleted" interchangeably,
+since an object that has been deleted and then undeleted is indistinguishable
+from one that has never been deleted at all.
+
+Installation
+------------
+
+1) Put resurrectable/ somewhere in your PYTHONPATH.
+
+2) Add resurrectable to the INSTALLED_APPS list in your settings.py file.
+
+3) Subclass resurrectable.models.Resurrectable for any model that you want to be
+   resurrectable.
+
+4) (optional) Define an iterable in the Meta class of your resurrectable models,
+   called 'resurrectable_children'. The members of this iterable should be
+   strings mapping to related objects that will be (un)deleted with this object.
+   (See note below about the current abilities of cascading deletes).
+
+   Example:
+
+       from django.db import models
+       from resurrectable.models import Resurrectable
+
+       class Choice(models.Model):
+           answer = models.CharField(max_length=80)
+           poll = models.ForeignKey(Poll, related_name='choices')
+
+       class Poll(Resurrectable, models.Model):
+           question = models.CharField(max_length=80)
+
+           class Meta:
+               resurrectable_children = ['choices']
+
+5) Somehow add the 'deleted' date_time field to tables in your database that
+   represent resurrectable models (e.g. drop the model tables and run
+   manage.py syncdb, use a schema migration tool, sling some SQL, etc.).
+
+(Un)deleting Objects
+--------------------
+
+* Deleting: To pseudo-delete an object, just call its delete() method as usual.
+* Undeleting: Call the object's undelete() method.
+
+Both methods support a 'cascade' keyword argument that defaults to True.
+Calling either method with cascade=False will skip the (un)deleting of
+objects specified by the object's resurrectable_children Meta attribute.
+
+Querying for (Un)deleted Objects
+--------------------------------
+
+To get all objects (deleted and undeleted), simply query as you normally would:
+    Foo.objects.all()
+
+To get only objects that are deleted, call the deleted() method on a queryset:
+    Foo.objects.all().deleted()
+This is the same as:
+    Foo.objects.exclude(deleted=None)
+
+To get only objects that have not been deleted, call the not_deleted() method:
+    Foo.objects.all().not_deleted()
+This is the same as:
+    Foo.objects.filter(deleted=None)
+
+Notes
+-----
+
+* If you want to use a custom manager for any model subclassing Resurrectable,
+  it should subclass ResurrectableManager (otherwise the queryset methods
+  discussed above will not be available filtered out).
+
+* Cascading doesn't work yet.
