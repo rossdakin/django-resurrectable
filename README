@@ -65,13 +65,22 @@ To get all objects (deleted and undeleted), simply query as you normally would:
 
 To get only objects that are deleted, call the deleted() method on a queryset:
     Foo.objects.all().deleted()
-This is the same as:
-    Foo.objects.exclude(deleted=None)
 
 To get only objects that have not been deleted, call the not_deleted() method:
     Foo.objects.all().not_deleted()
-This is the same as:
-    Foo.objects.filter(deleted=None)
+
+You can determine if an object has been deleted by calling object.is_deleted().
+
+Admin
+-----
+
+ModelAdmin subclasses may also subclass resurrectable.admin.ResurrectableAdmin
+to inherit two boolean methods:
+
+ * is_deleted(self, object)
+ * not_deleted(self, object)
+
+These may be used anywhere a ModelAdmin method is allowed (e.g. list_display).
 
 Notes
 -----
@@ -79,5 +88,7 @@ Notes
 * If you want to use a custom manager for any model subclassing Resurrectable,
   it should subclass ResurrectableManager (otherwise the queryset methods
   discussed above will not be available filtered out).
+
+* Admin strings are currently English only.
 
 * Cascading doesn't work yet.

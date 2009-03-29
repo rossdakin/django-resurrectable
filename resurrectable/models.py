@@ -15,6 +15,7 @@ class ResurrectableManager(models.Manager):
 class Resurrectable(models.Model):
     """
     Public methods:
+     * is_deleted(self)
      * delete(self, date_time=datetime.datetime.now(), cascade=True)
      * undelete(self, cascade=True)
     """
@@ -28,6 +29,9 @@ class Resurrectable(models.Model):
 
     def _get_resurrectable_children(self):
         return getattr(self.Meta, 'resurrectable_children', [])
+
+    def is_deleted(self):
+        return not self.deleted == None
 
     def delete(self, cascade=True, date_time=datetime.datetime.now()):
         if cascade and False:
