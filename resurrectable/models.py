@@ -24,7 +24,7 @@ class Resurrectable(models.Model):
      * undelete(self, cascade=True)
     """
     deleted = models.DateTimeField(blank=True, null=True, default=None,
-                                   db_index=True)
+                                   editable=False, db_index=True,)
 
     objects = ResurrectableManager()
 
