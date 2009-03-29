@@ -2,15 +2,19 @@ import datetime
 from django.db import models
 
 class ResurrectableQuerySet(models.query.QuerySet):
-    def not_deleted(self):
-        return self.filter(deleted=None)
     def deleted(self):
         return self.exclude(deleted=None)
+    def not_deleted(self):
+        return self.filter(deleted=None)
 
 class ResurrectableManager(models.Manager):
     use_for_related_fields = True
     def get_query_set(self):
         return ResurrectableQuerySet(self.model)
+    def deleted(self):
+        return self.get_query_set().deleted()
+    def not_deleted(self):
+        return self.get_query_set().not_deleted()
 
 class Resurrectable(models.Model):
     """
