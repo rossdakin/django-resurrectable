@@ -62,12 +62,16 @@ Querying for (Un)deleted Objects
 
 To get all objects (deleted and undeleted), simply query as you normally would:
     Foo.objects.all()
-
 To get only objects that are deleted, call the deleted() method on a queryset:
     Foo.objects.all().deleted()
-
 To get only objects that have not been deleted, call the not_deleted() method:
     Foo.objects.all().not_deleted()
+
+A shortcut function (resurrectable.shortcuts.get_nondeleted_or_404()) exists
+for easily getting a particular object while ensuring that it hasn't been
+deleted. This function takes the same arguments as and behaves the same as
+django.shortcuts.get_object_or_404, except if the object is deleted, Http404
+is raised.
 
 You can determine if an object has been deleted by calling object.is_deleted().
 
