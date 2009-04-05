@@ -31,15 +31,15 @@ class Resurrectable(models.Model):
     class Meta:
         abstract = True
 
-    def _get_resurrectable_children(self):
-        return getattr(self.Meta, 'resurrectable_children', [])
+    def get_resurrectable_children(self):
+        return []
 
     def is_deleted(self):
         return not self.deleted == None
 
     def delete(self, cascade=True, date_time=datetime.datetime.now()):
         if cascade and False:
-            for child in self._get_resurrectable_children():
+            for child in self.get_resurrectable_children():
                 child.delete(date_time)
         self.deleted = date_time
         self.save()
@@ -48,5 +48,5 @@ class Resurrectable(models.Model):
         self.deleted = None
         self.save()
         if cascade and False:
-            for child in self._get_resurrectable_children():
+            for child in self.get_resurrectable_children():
                 child.undelete()

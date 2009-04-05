@@ -23,8 +23,8 @@ Installation
 3) Subclass resurrectable.models.Resurrectable for any model that you want to be
    resurrectable.
 
-4) (optional) Define an iterable in the Meta class of your resurrectable models,
-   called 'resurrectable_children'. The members of this iterable should be
+4) (optional) Define a method called get_resurrectable_children() on your
+   resurrectable model classes. This method should return an iterable of
    strings mapping to related objects that will be (un)deleted with this object.
    (See note below about the current abilities of cascading deletes).
 
@@ -40,8 +40,8 @@ Installation
        class Poll(Resurrectable, models.Model):
            question = models.CharField(max_length=80)
 
-           class Meta:
-               resurrectable_children = ['choices']
+           def get_resurrectable_children(self):
+               return ['choices']
 
 5) Somehow add the 'deleted' date_time field to tables in your database that
    represent resurrectable models (e.g. drop the model tables and run
