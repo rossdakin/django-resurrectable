@@ -32,7 +32,7 @@ class Resurrectable(models.Model):
         abstract = True
 
     def get_resurrectable_children(self):
-        return []
+        return ()
 
     def is_deleted(self):
         return not self.deleted == None
